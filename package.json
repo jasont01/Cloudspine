@@ -1,0 +1,19 @@
+{
+  "name": "cloudspine",
+  "version": "1.0.0",
+  "description": "unified backend for my personal projects",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasont01/cloudspine.git"
+  },
+  "author": "jason@jasont.us",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasont01/cloudspine/issues"
+  },
+  "homepage": "https://github.com/jasont01/cloudspine#readme"
+}
