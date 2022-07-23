@@ -4,7 +4,9 @@
   "description": "unified backend for my personal projects",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "deploy": "git push heroku master"
   },
   "repository": {
     "type": "git",
