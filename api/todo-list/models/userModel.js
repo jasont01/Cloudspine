@@ -4,11 +4,9 @@ const userSchema = mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: [true, 'First name is required'],
     },
     lastName: {
       type: String,
-      required: [true, 'Last name is required'],
     },
     email: {
       type: String,
@@ -18,6 +16,7 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
     },
+    sessions: [String],
   },
   {
     timestamps: true,

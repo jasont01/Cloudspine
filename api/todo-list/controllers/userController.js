@@ -1,33 +1,24 @@
-const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const User = require('../models/userModel.js')
 const List = require('../models/listModel.js')
 const Item = require('../models/itemModel.js')
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  })
-}
-
 /**
  * @desc   Register user
- * @route  POST /api/todo-list/user/register
+ * @route  POST /api/user/register
  * @access Public
  */
 const registerUser = async (req, res) => {
   const { firstName, lastName, email, password } = req.body
 
-  if (!firstName || !lastName || !email || !password) {
-    res.status(400)
-    throw new Error('All fields are required')
+  if (!email || !password) {
+    return res.status(400).json({ error: 'email & password are required' })
   }
 
   const userExists = await User.findOne({ email })
 
   if (userExists) {
-    res.status(400)
-    throw new Error('User already exists')
+    return res.status(400).json({ error: 'user already exists' })
   }
 
   const salt = await bcrypt.genSalt(10)
@@ -40,88 +31,52 @@ const registerUser = async (req, res) => {
     password: hashedPassword,
   })
 
-  if (!user) {
-    res.status(400)
-    throw new Error('Error registering user')
-  }
+  if (!user) return res.sendStatus(400)
 
   await List.create({
     user: user._id,
     title: 'Default List',
   })
 
-  res.status(201).json({
-    _id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    token: generateToken(user._id),
-  })
-}
-
-/**
- * @desc   Login user
- * @route  POST /api/todo-list/user/login
- * @access Public
- */
-const loginUser = async (req, res) => {
-  const { email, password } = req.body
-  const user = await User.findOne({ email })
-
-  if (user && (await bcrypt.compare(password, user.password))) {
-    res.json({
-      _id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      remember: req.body.remember,
-      token: generateToken(user.id),
-    })
-  } else {
-    res.status(400).json({
-      message: 'Invalid credentials',
-    })
-  }
+  res.status(201).json(user)
 }
 
 /**
  * @desc   Get user
- * @route  GET /api/todo-list/user
+ * @route  GET /api/user
  * @access Private
  */
 const getUser = async (req, res) => {
   try {
-    req.user = await User.findById(req.userId).select('-password')
-    res.status(200).json(req.user)
+    const user = await User.findById(req.user._id).select('-password')
+    res.status(200).json({ _id: user._id, email: user.email })
   } catch (err) {
-    res.status(401)
-    throw new Error('Not authorized')
+    return res.status(401).json({ error: 'Not authorized' })
   }
 }
 
 /**
  * @desc   Delete user
- * @route  DELETE /api/todo-list/user
+ * @route  DELETE /api/user
  * @access Private
  */
 const deleteUser = async (req, res) => {
   const user = await User.findById(req.params.id)
 
   if (!user) {
-    res.status(400)
-    throw new Error('User not found')
+    return res.status(400).json({ error: 'User not found' })
   }
 
-  if (user._id.toString() !== req.userId) {
-    res.status(401)
-    throw new Error('Not authorized')
+  //if (user._id.toString() !== req.user._id.toString()) {
+  if (!user._id.equals(req.user._id)) {
+    return res.status(401).json({ error: 'Not authorized' })
   }
 
-  await Item.deleteMany({ user: req.userId })
-  await List.deleteMany({ user: req.userId })
-  await User.findByIdAndDelete(req.userId)
+  await Item.deleteMany({ user: req.user._id })
+  await List.deleteMany({ user: req.user._id })
+  await User.findByIdAndDelete(req.user._id)
 
   res.status(204).end()
 }
 
-module.exports = { registerUser, loginUser, getUser, deleteUser }
+module.exports = { registerUser, getUser, deleteUser }

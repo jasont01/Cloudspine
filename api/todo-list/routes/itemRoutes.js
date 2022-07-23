@@ -1,5 +1,4 @@
 const express = require('express')
-const protect = require('../middleware/authMiddleware')
 const {
   getItems,
   createItem,
@@ -7,9 +6,13 @@ const {
   deleteItem,
 } = require('../controllers/itemController.js')
 
+const { verifyAccessToken } = require('../middleware/authMiddleware')
+
 const router = express.Router()
 
-router.route('/').get(protect, getItems).post(protect, createItem)
-router.route('/:id').put(protect, updateItem).delete(protect, deleteItem)
+router.post('/', verifyAccessToken, createItem)
+router.get('/', verifyAccessToken, getItems)
+router.put('/:id', verifyAccessToken, updateItem)
+router.delete('/:id', verifyAccessToken, deleteItem)
 
 module.exports = router

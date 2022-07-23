@@ -5,11 +5,14 @@ const {
   updateList,
   deleteList,
 } = require('../controllers/listController.js')
-const protect = require('../middleware/authMiddleware.js')
+
+const { verifyAccessToken } = require('../middleware/authMiddleware')
 
 const router = express.Router()
 
-router.route('/').get(protect, getLists).post(protect, createList)
-router.route('/:id').put(protect, updateList).delete(protect, deleteList)
+router.post('/', verifyAccessToken, createList)
+router.get('/', verifyAccessToken, getLists)
+router.put('/:id', verifyAccessToken, updateList)
+router.delete('/:id', verifyAccessToken, deleteList)
 
 module.exports = router

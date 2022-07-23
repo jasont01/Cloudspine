@@ -1,21 +1,40 @@
 const jwt = require('jsonwebtoken')
+const User = require('../models/userModel')
 
-const protect = async (req, res, next) => {
-  const token = req.header('Authorization').split(' ')[1]
-
-  if (!token) {
-    res.status(401)
-    throw new Error('No token, authorization denied')
-  }
+const verifyRefreshToken = async (req, res, next) => {
+  if (!req.cookies.token) return res.sendStatus(401)
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.userId = decoded.id
+    const token = req.cookies.token
+
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
+
+    req.user = await User.findById(decoded.id).select('-password')
+
+    if (!req.user) return res.sendStatus(401)
+
     next()
-  } catch (err) {
-    res.status(401)
-    throw new Error('Invlaid token, authorization denied')
+  } catch (error) {
+    return res.sendStatus(403)
   }
 }
 
-module.exports = protect
+const verifyAccessToken = async (req, res, next) => {
+  if (!req.headers.authorization) return res.sendStatus(401)
+
+  try {
+    const token = req.headers.authorization.split(' ')[1]
+
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+
+    req.user = await User.findById(decoded.id).select('-password')
+
+    if (!req.user) return res.sendStatus(401)
+
+    next()
+  } catch (error) {
+    return res.sendStatus(403)
+  }
+}
+
+module.exports = { verifyRefreshToken, verifyAccessToken }

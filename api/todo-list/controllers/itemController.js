@@ -3,18 +3,18 @@ const Item = require('../models/itemModel.js')
 
 /**
  * @desc Get all items owned by user
- * @route GET /api/todo-list/items
+ * @route GET /api/items
  * @access Private
  */
 const getItems = async (req, res) => {
-  const items = await Item.find({ user: req.userId }).select('-__v')
+  const items = await Item.find({ user: req.user._id }).select('-__v')
 
   res.status(200).json(items)
 }
 
 /**
  * @desc Crate a new Item
- * @route POST /api/todo-list/items
+ * @route POST /api/items
  * @access Private
  */
 
@@ -22,24 +22,21 @@ const createItem = async (req, res) => {
   const { description, date, priority, listId } = req.body
 
   if (!description) {
-    res.status(400)
-    throw new Error('Please add a description')
+    return res.status(400).json({ error: 'Please add a description' })
   }
 
   const list = await List.findById(listId)
 
   if (!list) {
-    res.status(400)
-    throw new Error('List not found')
+    return res.status(400).json({ error: 'List not found' })
   }
 
-  if (list.user.toString() !== req.userId) {
-    res.status(401)
-    throw new Error('Not authorized')
+  if (!list.user.equals(req.user._id)) {
+    return res.status(403).json({ error: 'Not authorized' })
   }
 
   const newItem = await Item.create({
-    user: req.userId,
+    user: req.user._id,
     description,
     date,
     priority,
@@ -54,20 +51,18 @@ const createItem = async (req, res) => {
 
 /**
  * @desc Update an Item
- * @route PUT /api/todo-list/items/:id
+ * @route PUT /api/items/:id
  * @access Private
  */
 const updateItem = async (req, res) => {
   const item = await Item.findById(req.params.id)
 
   if (!item) {
-    res.status(400)
-    throw new Error('Item not found')
+    return res.status(400).json({ error: 'Item not found' })
   }
 
-  if (item.user.toString() !== req.userId) {
-    res.status(401)
-    throw new Error('Not authorized')
+  if (!item.user.equals(req.user._id)) {
+    return res.status(403).json({ error: 'Not authorized' })
   }
 
   const { description, date, priority, completed, listId } = req.body
@@ -77,13 +72,11 @@ const updateItem = async (req, res) => {
     const newList = await List.findById(listId)
 
     if (!oldList || !newList) {
-      res.status(400)
-      throw new Error('List not found')
+      return res.status(400).json({ error: 'List not found' })
     }
 
-    if (newList.user.toString() !== req.userId) {
-      res.status(401)
-      throw new Error('Not authorized')
+    if (!newList.user.equals(req.user._id)) {
+      return res.status(403).json({ error: 'Not authorized' })
     }
 
     oldList.items.pull(item._id)
@@ -111,28 +104,25 @@ const updateItem = async (req, res) => {
 }
 
 /**
- * @desc Delete a list
- * @route DELETE /api/todo-list/items/:id
+ * @desc Delete an item
+ * @route DELETE /api/items/:id
  * @access Private
  */
 const deleteItem = async (req, res) => {
   const item = await Item.findById(req.params.id)
 
   if (!item) {
-    res.status(400)
-    throw new Error('Item not found')
+    return res.status(400).json({ error: 'Item not found' })
   }
 
-  if (item.user.toString() !== req.userId) {
-    res.status(401)
-    throw new Error('Not authorized')
+  if (!item.user.equals(req.user._id)) {
+    return res.status(403).json({ error: 'Not authorized' })
   }
 
   const list = await List.findById(item.listId)
 
   if (!list) {
-    res.status(400)
-    throw new Error('List not found')
+    return res.status(400).json({ error: 'List not found' })
   }
 
   list.items.pull(item)
