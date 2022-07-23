@@ -7,9 +7,15 @@ const cors = require('cors')
 
 const app = express()
 
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === 'development' || 'https://web-notes.netlify.app',
+  credentials: true,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ origin: true, credentials: true }))
 
 app.use('/api', require('./api/apps'))
 
