@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jasont01/cloudspine.git"
+    "url": "git+https://github.com/jasont01/cloudspine"
   },
   "author": "jason@jasont.us",
   "license": "ISC",
