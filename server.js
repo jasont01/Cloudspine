@@ -11,8 +11,6 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(cors())
 
-//app.use('/api/notes', require('./apps/notes/routes/index'))
-//app.use('/api/todo-list', require('./apps/todo-list/routes/index'))
 app.use('/api', require('./api/apps'))
 
 app.use((req, res) =>
