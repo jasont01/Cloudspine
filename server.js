@@ -7,9 +7,9 @@ const cors = require('cors')
 
 const app = express()
 
+//process.env.NODE_ENV === 'development' || 'https://web-notes.netlify.app',
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === 'development' || 'https://web-notes.netlify.app',
+  origin: true,
   credentials: true,
 }
 
