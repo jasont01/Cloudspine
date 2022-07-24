@@ -53,10 +53,7 @@ const loginUser = async (req, res) => {
 // @route   GET /api/auth/session
 // @access  Public
 const session = async (req, res) => {
-  if (!req.cookies.token)
-    return res.json({
-      accessToken: null,
-    })
+  if (!req.cookies.token) return res.sendStatus(204)
 
   try {
     const refreshToken = req.cookies.token
@@ -67,17 +64,15 @@ const session = async (req, res) => {
     const validSession = user.sessions.find(
       (session) => session === refreshToken
     )
-    if (!validSession) return res.sendStatus(403)
+    if (!validSession) return res.status(403).json({ error: 'invalid session' })
 
-    res.json({
+    res.status(200).json({
       _id: user._id,
       email: user.email,
       accessToken: generateAccessToken(id),
     })
   } catch (error) {
-    res.json({
-      accessToken: null,
-    })
+    res.status(400).json({ error })
   }
 }
 
