@@ -5,7 +5,7 @@ const User = require('../models/userModel')
 const cookieOptions = {
   maxAge: 180 * 24 * 60 * 60 * 1000, // 180 days
   httpOnly: true,
-  sameSite: false,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : false,
   secure: process.env.NODE_ENV === 'production',
 }
 
@@ -57,7 +57,7 @@ const session = async (req, res) => {
     return res.json({
       accessToken: null,
     })
-  console.log(req.cookies)
+
   try {
     const refreshToken = req.cookies.token
     const { id } = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
