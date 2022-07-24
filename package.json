@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "deploy": "git push heroku master",
-    "sync": "bash utils/sync.sh"
+    "sync": "bash utils/sync.sh",
+    "deploy": "npm run sync && git add . && git commit -m 'sync' && git push heroku master"
   },
   "repository": {
     "type": "git",
